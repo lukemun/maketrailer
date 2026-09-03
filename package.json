@@ -12,7 +12,7 @@
     "mcp": "tsx mcp/server.ts",
     "mcp:smoke": "tsx scripts/mcp-smoke.ts",
     "smoke": "tsx scripts/smoke.ts",
-    "test": "tsx --test lib/store.test.ts"
+    "test": "tsx --test src/lib/store.test.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",

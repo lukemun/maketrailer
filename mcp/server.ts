@@ -20,9 +20,9 @@ import {
   patchDesign,
   patchProject,
   updateElement,
-} from "../lib/store";
-import { generateImage } from "../lib/fal";
-import { designElementSchema } from "../lib/schema";
+} from "../src/lib/store";
+import { generateImage } from "../src/lib/fal";
+import { designElementSchema } from "../src/lib/schema";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local"), quiet: true });
 

@@ -5,7 +5,7 @@ import path from "node:path";
 
 const directory = await mkdtemp(path.join(os.tmpdir(), "maketrailer-ce-smoke-"));
 process.env.MAKETRAILER_DATA_DIR = directory;
-const store = await import("../lib/store");
+const store = await import("../src/lib/store");
 
 try {
   const created = await store.createDesign({ name: "Smoke test ad", preset: "instagram-square", template: "bold-offer" });
