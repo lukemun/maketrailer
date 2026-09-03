@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a reproducible Community Edition problem
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: Never paste API keys or private designs into an issue.
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened?
+      description: Include the expected and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Give the smallest complete sequence that reproduces the issue.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, Node version, pnpm version, and commit or release.
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Checks run
+      description: Share relevant test, build, or MCP results with secrets removed.
