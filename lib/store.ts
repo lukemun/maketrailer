@@ -3,12 +3,19 @@ import { randomUUID } from "node:crypto";
 import path from "node:path";
 import {
   PRESETS,
+  assetSchema,
   createDesignSchema,
+  createProjectSchema,
   designSchema,
+  projectSchema,
+  type Asset,
   type CreateDesignInput,
   type Design,
   type DesignElement,
+  type Project,
 } from "./schema";
+
+export const DEFAULT_PROJECT_ID = "local";
 
 export function dataDirectory(): string {
   return path.resolve(process.env.MAKETRAILER_DATA_DIR || path.join(process.cwd(), ".maketrailer"));
@@ -16,6 +23,14 @@ export function dataDirectory(): string {
 
 function designsDirectory(): string {
   return path.join(dataDirectory(), "designs");
+}
+
+function projectsDirectory(): string {
+  return path.join(dataDirectory(), "projects");
+}
+
+function assetsDirectory(): string {
+  return path.join(dataDirectory(), "assets");
 }
 
 export function mediaDirectory(): string {
@@ -31,11 +46,33 @@ function designPath(id: string): string {
   return path.join(designsDirectory(), `${safeId(id)}.json`);
 }
 
+function projectPath(id: string): string {
+  return path.join(projectsDirectory(), `${safeId(id)}.json`);
+}
+
+function assetPath(id: string): string {
+  return path.join(assetsDirectory(), `${safeId(id)}.json`);
+}
+
 async function ensureDirectories(): Promise<void> {
   await Promise.all([
     mkdir(designsDirectory(), { recursive: true }),
+    mkdir(projectsDirectory(), { recursive: true }),
+    mkdir(assetsDirectory(), { recursive: true }),
     mkdir(mediaDirectory(), { recursive: true }),
   ]);
+  try {
+    await readFile(projectPath(DEFAULT_PROJECT_ID), "utf8");
+  } catch {
+    const now = new Date().toISOString();
+    await atomicJsonWrite(projectPath(DEFAULT_PROJECT_ID), {
+      id: DEFAULT_PROJECT_ID,
+      name: "My projects",
+      description: "Default workspace for designs created before project organization was enabled.",
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
 }
 
 async function atomicJsonWrite(file: string, value: unknown): Promise<void> {
@@ -44,23 +81,32 @@ async function atomicJsonWrite(file: string, value: unknown): Promise<void> {
   await rename(temporary, file);
 }
 
-export async function listDesigns(): Promise<Design[]> {
+async function parseStoredDesign(file: string): Promise<Design> {
+  const raw = JSON.parse(await readFile(file, "utf8")) as Record<string, unknown>;
+  const migrated = raw.projectId ? raw : { ...raw, projectId: DEFAULT_PROJECT_ID };
+  const design = designSchema.parse(migrated);
+  if (!raw.projectId) await atomicJsonWrite(file, design);
+  return design;
+}
+
+export async function listDesigns(projectId?: string): Promise<Design[]> {
   await ensureDirectories();
   const files = (await readdir(designsDirectory())).filter((file) => file.endsWith(".json"));
   const values = await Promise.all(files.map(async (file) => {
     try {
-      return designSchema.parse(JSON.parse(await readFile(path.join(designsDirectory(), file), "utf8")));
+      return await parseStoredDesign(path.join(designsDirectory(), file));
     } catch {
       return null;
     }
   }));
   return values.filter((value): value is Design => value !== null)
+    .filter((value) => !projectId || value.projectId === projectId)
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
 export async function getDesign(id: string): Promise<Design> {
   await ensureDirectories();
-  return designSchema.parse(JSON.parse(await readFile(designPath(id), "utf8")));
+  return parseStoredDesign(designPath(id));
 }
 
 function templateElements(template: CreateDesignInput["template"], width: number, height: number): DesignElement[] {
@@ -82,10 +128,13 @@ function templateElements(template: CreateDesignInput["template"], width: number
 export async function createDesign(input: unknown): Promise<Design> {
   await ensureDirectories();
   const parsed = createDesignSchema.parse(input);
+  const projectId = parsed.projectId ?? DEFAULT_PROJECT_ID;
+  await getProject(projectId);
   const preset = PRESETS[parsed.preset];
   const now = new Date().toISOString();
   const design: Design = {
     id: randomUUID(),
+    projectId,
     name: parsed.name,
     width: preset.width,
     height: preset.height,
@@ -127,6 +176,103 @@ export async function updateElement(id: string, elementId: string, patch: Record
 export async function deleteElement(id: string, elementId: string): Promise<Design> {
   const design = await getDesign(id);
   return saveDesign({ ...design, elements: design.elements.filter((element) => element.id !== elementId) });
+}
+
+export async function listProjects(): Promise<Project[]> {
+  await ensureDirectories();
+  const files = (await readdir(projectsDirectory())).filter((file) => file.endsWith(".json"));
+  const values = await Promise.all(files.map(async (file) => {
+    try {
+      return projectSchema.parse(JSON.parse(await readFile(path.join(projectsDirectory(), file), "utf8")));
+    } catch {
+      return null;
+    }
+  }));
+  return values.filter((value): value is Project => value !== null)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+export async function getProject(id: string): Promise<Project> {
+  await ensureDirectories();
+  return projectSchema.parse(JSON.parse(await readFile(projectPath(id), "utf8")));
+}
+
+export async function createProject(input: unknown): Promise<Project> {
+  await ensureDirectories();
+  const parsed = createProjectSchema.parse(input);
+  const now = new Date().toISOString();
+  const project = projectSchema.parse({
+    id: randomUUID(),
+    ...parsed,
+    createdAt: now,
+    updatedAt: now,
+  });
+  await atomicJsonWrite(projectPath(project.id), project);
+  return project;
+}
+
+export async function patchProject(id: string, patch: Partial<Pick<Project, "name" | "description">>): Promise<Project> {
+  const current = await getProject(id);
+  const project = projectSchema.parse({ ...current, ...patch, id: current.id, updatedAt: new Date().toISOString() });
+  await atomicJsonWrite(projectPath(project.id), project);
+  return project;
+}
+
+export async function listAssets(filters: { projectId?: string; kind?: Asset["kind"] } = {}): Promise<Asset[]> {
+  await ensureDirectories();
+  const files = (await readdir(assetsDirectory())).filter((file) => file.endsWith(".json"));
+  const values = await Promise.all(files.map(async (file) => {
+    try {
+      return assetSchema.parse(JSON.parse(await readFile(path.join(assetsDirectory(), file), "utf8")));
+    } catch {
+      return null;
+    }
+  }));
+  return values.filter((value): value is Asset => value !== null)
+    .filter((value) => !filters.projectId || value.projectId === filters.projectId)
+    .filter((value) => !filters.kind || value.kind === filters.kind)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+export async function getAsset(id: string): Promise<Asset> {
+  await ensureDirectories();
+  return assetSchema.parse(JSON.parse(await readFile(assetPath(id), "utf8")));
+}
+
+export async function createAsset(input: {
+  bytes: Uint8Array;
+  extension: string;
+  filename: string;
+  mimeType: string;
+  projectId?: string | null;
+  kind?: Asset["kind"];
+}): Promise<Asset> {
+  const projectId = input.projectId ?? null;
+  if (projectId) await getProject(projectId);
+  const src = await storeMedia(input.bytes, input.extension);
+  const now = new Date().toISOString();
+  const asset = assetSchema.parse({
+    id: randomUUID(),
+    projectId,
+    kind: input.kind ?? "image",
+    src,
+    filename: input.filename,
+    mimeType: input.mimeType,
+    favorite: false,
+    labels: [],
+    createdAt: now,
+    updatedAt: now,
+  });
+  await atomicJsonWrite(assetPath(asset.id), asset);
+  return asset;
+}
+
+export async function patchAsset(id: string, patch: Partial<Pick<Asset, "projectId" | "favorite" | "labels" | "filename">>): Promise<Asset> {
+  const current = await getAsset(id);
+  if (patch.projectId) await getProject(patch.projectId);
+  const asset = assetSchema.parse({ ...current, ...patch, id: current.id, updatedAt: new Date().toISOString() });
+  await atomicJsonWrite(assetPath(asset.id), asset);
+  return asset;
 }
 
 export async function storeMedia(bytes: Uint8Array, extension: string): Promise<string> {

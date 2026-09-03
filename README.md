@@ -1,10 +1,10 @@
-# MakeTrailer Community Edition
+# MakeTrailer OS
 
 An open, local ad canvas your AI agent can operate.
 
-Community Edition saves designs and images on your computer, generates images with your own fal.ai key, exports full-resolution PNGs, and exposes the same editable designs through a local MCP server. It has no account, Supabase, tracking, managed credit, or MakeTrailer cloud requirement.
+MakeTrailer OS saves projects, designs, and reusable assets on your computer, generates images with your own fal.ai key, exports full-resolution PNGs, and exposes the same workspace through a local MCP server. It has no account, Supabase, tracking, managed credit, or MakeTrailer cloud requirement.
 
-> Status: early Community Edition. The local design, persistence, generation, export, and MCP paths are implemented; expect the file format and tool surface to evolve before 1.0.
+> Status: early extraction. The local projects, assets, design, persistence, generation, export, and MCP foundations are implemented. The full production MakeTrailer canvas is now being moved here; the current editor is temporary and does not yet represent production parity. See [the roadmap](docs/roadmap.md).
 
 ## What you get
 
@@ -15,6 +15,7 @@ Community Edition saves designs and images on your computer, generates images wi
 - local image uploads
 - server-side BYO fal.ai generation using Flux Schnell
 - full-resolution PNG export
+- local projects and a reusable asset library
 - atomic local JSON persistence and a local media folder
 - stdio MCP tools, resources, and an ad-design prompt
 - portable image-prompt and visual-composition skills
@@ -28,8 +29,8 @@ Community Edition saves designs and images on your computer, generates images wi
 ## Set up
 
 ```bash
-git clone <your-community-edition-repository-url>
-cd community-edition
+git clone https://github.com/lukemun/maketrailer-os.git
+cd maketrailer-os
 pnpm install
 cp .env.example .env.local
 pnpm dev
@@ -57,11 +58,13 @@ By default, data lives in:
 
 ```text
 .maketrailer/
+├── projects/  # local workspaces
 ├── designs/   # editable JSON documents
+├── assets/    # reusable media metadata
 └── media/     # uploads and downloaded generations
 ```
 
-Set `MAKETRAILER_DATA_DIR` to an absolute path to store it elsewhere. Back up that directory to back up all Community Edition work.
+Set `MAKETRAILER_DATA_DIR` to an absolute path to store it elsewhere. Back up that directory to back up all MakeTrailer OS work.
 
 ## Connect MCP locally
 
@@ -70,11 +73,11 @@ First install dependencies. Then add this stdio server to your MCP client, repla
 ```json
 {
   "mcpServers": {
-    "maketrailer-community": {
+    "maketrailer-os": {
       "command": "pnpm",
-      "args": ["--dir", "/absolute/path/to/community-edition", "--silent", "mcp"],
+      "args": ["--dir", "/absolute/path/to/maketrailer-os", "--silent", "mcp"],
       "env": {
-        "MAKETRAILER_DATA_DIR": "/absolute/path/to/community-edition/.maketrailer"
+        "MAKETRAILER_DATA_DIR": "/absolute/path/to/maketrailer-os/.maketrailer"
       }
     }
   }
@@ -83,7 +86,15 @@ First install dependencies. Then add this stdio server to your MCP client, repla
 
 If your MCP client does not run the command from the package directory, the `--dir` argument is important. Put `FAL_KEY` in `.env.local` in that directory; do not paste it into a prompt.
 
-Available tools:
+Available tools currently include:
+
+- `list_projects`
+- `get_project`
+- `create_project`
+- `update_project`
+- `list_assets`
+- `get_asset`
+- `update_asset`
 
 - `list_designs`
 - `get_design`
@@ -128,9 +139,9 @@ The smoke check uses a temporary data directory and proves create → save → r
 
 This is local software, not a security boundary against other processes with access to your user account. See [SECURITY.md](SECURITY.md) for reporting.
 
-## Community versus hosted MakeTrailer
+## Open source versus hosted MakeTrailer
 
-Community Edition includes the complete local ad-canvas loop. Hosted MakeTrailer may provide accounts, collaboration, managed generation and credits, hosted media, publishing, campaign and book workflows, organization controls, and support. Community Edition should not phone home or silently require those services.
+MakeTrailer OS will contain the complete production canvas, local projects and assets, BYO generation, export, and MCP control. Hosted MakeTrailer may provide accounts, collaboration, managed generation and credits, hosted media, publishing, campaign and book workflows, organization controls, and support. MakeTrailer OS must not phone home or silently require those services.
 
 ## Contributing
 
@@ -138,4 +149,4 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT
 
 ## License
 
-Community Edition is licensed under AGPL-3.0-or-later. See [LICENSE](LICENSE). The MakeTrailer name and logos are not granted under that software license.
+MakeTrailer OS is licensed under AGPL-3.0-or-later. See [LICENSE](LICENSE). The MakeTrailer name and logos are not granted under that software license.

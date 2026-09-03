@@ -3,8 +3,9 @@ import { createDesign, listDesigns } from "@/lib/store";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  return Response.json({ designs: await listDesigns() });
+export async function GET(request: Request) {
+  const projectId = new URL(request.url).searchParams.get("projectId") || undefined;
+  return Response.json({ designs: await listDesigns(projectId) });
 }
 
 export async function POST(request: Request) {

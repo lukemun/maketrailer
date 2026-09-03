@@ -1,4 +1,4 @@
-import { getDesign, saveDesign, storeMedia } from "./store";
+import { createAsset, getDesign, saveDesign } from "./store";
 import type { ImageElement } from "./schema";
 import { randomUUID } from "node:crypto";
 
@@ -16,6 +16,7 @@ export function falConfigured(): boolean {
 
 export async function generateImage(designId: string, prompt: string): Promise<{ design: Awaited<ReturnType<typeof getDesign>>; src: string; model: string }> {
   if (!prompt.trim()) throw new Error("Prompt is required");
+  const design = await getDesign(designId);
   const response = await fetch(`https://fal.run/${MODEL}`, {
     method: "POST",
     headers: { authorization: `Key ${falKey()}`, "content-type": "application/json" },
@@ -31,8 +32,15 @@ export async function generateImage(designId: string, prompt: string): Promise<{
   const bytes = new Uint8Array(await imageResponse.arrayBuffer());
   const contentType = imageResponse.headers.get("content-type") || remote.content_type || "image/png";
   const extension = contentType.includes("webp") ? "webp" : contentType.includes("jpeg") ? "jpg" : "png";
-  const src = await storeMedia(bytes, extension);
-  const design = await getDesign(designId);
+  const asset = await createAsset({
+    bytes,
+    extension,
+    filename: `Generated image.${extension}`,
+    mimeType: contentType,
+    projectId: design.projectId,
+    kind: "image",
+  });
+  const src = asset.src;
   const element: ImageElement = {
     id: randomUUID(), type: "image", src, alt: prompt.trim(), fit: "cover",
     x: design.width * 0.18, y: design.height * 0.43, width: design.width * 0.64, height: design.height * 0.32,

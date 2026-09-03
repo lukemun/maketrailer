@@ -40,6 +40,7 @@ export const designElementSchema = z.discriminatedUnion("type", [
 
 export const designSchema = z.object({
   id: z.string().regex(/^[a-zA-Z0-9_-]+$/),
+  projectId: z.string().regex(/^[a-zA-Z0-9_-]+$/),
   name: z.string().min(1).max(160),
   width: z.number().int().min(240).max(4096),
   height: z.number().int().min(240).max(4096),
@@ -51,6 +52,7 @@ export const designSchema = z.object({
 
 export const createDesignSchema = z.object({
   name: z.string().trim().min(1).max(160).default("Untitled ad"),
+  projectId: z.string().regex(/^[a-zA-Z0-9_-]+$/).optional(),
   preset: z.enum(["instagram-square", "instagram-story", "facebook-feed", "linkedin-feed"]).default("instagram-square"),
   template: z.enum(["blank", "bold-offer", "testimonial"]).default("bold-offer"),
 });
@@ -61,6 +63,37 @@ export type TextElement = z.infer<typeof textElementSchema>;
 export type ShapeElement = z.infer<typeof shapeElementSchema>;
 export type ImageElement = z.infer<typeof imageElementSchema>;
 export type CreateDesignInput = z.infer<typeof createDesignSchema>;
+
+export const projectSchema = z.object({
+  id: z.string().regex(/^[a-zA-Z0-9_-]+$/),
+  name: z.string().trim().min(1).max(160),
+  description: z.string().max(2000).default(""),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const createProjectSchema = z.object({
+  name: z.string().trim().min(1).max(160),
+  description: z.string().max(2000).default(""),
+});
+
+export const assetSchema = z.object({
+  id: z.string().regex(/^[a-zA-Z0-9_-]+$/),
+  projectId: z.string().regex(/^[a-zA-Z0-9_-]+$/).nullable(),
+  kind: z.enum(["image", "video"]),
+  src: z.string().max(2048),
+  filename: z.string().min(1).max(500),
+  mimeType: z.string().min(1).max(160),
+  favorite: z.boolean().default(false),
+  labels: z.array(z.string().trim().min(1).max(80)).max(50).default([]),
+  width: z.number().int().positive().optional(),
+  height: z.number().int().positive().optional(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export type Project = z.infer<typeof projectSchema>;
+export type Asset = z.infer<typeof assetSchema>;
 
 export const PRESETS = {
   "instagram-square": { label: "Instagram square", width: 1080, height: 1080 },

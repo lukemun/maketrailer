@@ -83,7 +83,7 @@ export function DesignEditor({ designId }: { designId: string }) {
 
   async function upload(file: File) {
     if (!design) return;
-    const form = new FormData(); form.set("file", file);
+    const form = new FormData(); form.set("file", file); form.set("projectId", design.projectId);
     const response = await fetch("/api/upload", { method: "POST", body: form }); const data = await response.json();
     if (!response.ok) { setMessage(data.error || "Upload failed"); return; }
     const element: ImageElement = { id: crypto.randomUUID(), type: "image", src: data.src, alt: file.name, fit: "cover", x: design.width * 0.18, y: design.height * 0.43, width: design.width * 0.64, height: design.height * 0.32, rotation: 0, opacity: 1 };

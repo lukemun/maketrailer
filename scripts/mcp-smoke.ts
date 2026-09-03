@@ -33,6 +33,8 @@ const completion = new Promise<void>((resolve, reject) => {
     } else if (message.id === 2) {
       const names = message.result?.tools?.map((tool) => tool.name) || [];
       assert.ok(names.includes("create_design"));
+      assert.ok(names.includes("create_project"));
+      assert.ok(names.includes("list_assets"));
       assert.ok(names.includes("generate_image"));
       assert.ok(names.includes("list_creative_skills"));
       send({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "create_design", arguments: { name: "MCP smoke ad", preset: "instagram-square", template: "bold-offer" } } });
