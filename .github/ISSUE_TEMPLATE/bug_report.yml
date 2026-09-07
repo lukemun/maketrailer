@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible Community Edition problem
+description: Report a reproducible MakeTrailer problem
 title: "[Bug]: "
 body:
   - type: markdown

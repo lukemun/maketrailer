@@ -19,7 +19,7 @@ test("creates, updates, and reloads a local design", async () => {
 });
 
 test("organizes designs and reusable assets by project", async () => {
-  directory = await mkdtemp(path.join(os.tmpdir(), "maketrailer-os-project-test-"));
+  directory = await mkdtemp(path.join(os.tmpdir(), "maketrailer-project-test-"));
   process.env.MAKETRAILER_DATA_DIR = directory;
   const project = await createProject({ name: "Autumn campaign" });
   const design = await createDesign({ name: "Launch ad", projectId: project.id, preset: "instagram-square", template: "blank" });
