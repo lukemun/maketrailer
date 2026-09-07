@@ -1,8 +1,8 @@
-# MakeTrailer OS architecture
+# MakeTrailer architecture
 
 ## Product boundary
 
-MakeTrailer OS is the upstream, local-first implementation of MakeTrailer's
+This public repository is the upstream, local-first implementation of MakeTrailer's
 creative workspace. It owns the complete design-canvas experience and the
 portable data contracts around it:
 
@@ -16,6 +16,19 @@ portable data contracts around it:
 It deliberately does not contain the timeline editor, accounts, billing,
 hosted collaboration, publishing, analytics, book workflows, Stage, or managed
 campaign operations.
+
+## Repository boundary
+
+The public `maketrailer` repository is the only source of truth for the canvas,
+portable document contracts, local projects and assets, provider ports, export,
+and MCP control. Canvas behavior is never copied into a second application.
+
+The private `maketrailer-cloud` repository consumes this upstream through
+host adapters for authentication, Supabase persistence, billing, managed
+generation, collaboration, publishing, and private product workflows. The
+private `reason-and-reach` repository owns client inputs and outputs, campaign
+deliverables, prospecting, and agency operations; reusable product capability
+does not live there.
 
 ## Upstream rule
 
@@ -79,4 +92,3 @@ or import media, render a preview, and export a portable result.
 4. Run the same fixtures against the local and hosted adapters.
 5. Remove the temporary miniature editor only after the production editor
    passes the local clean-install and browser interaction suite.
-

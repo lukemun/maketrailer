@@ -61,7 +61,6 @@ adapters.
 
 ## Parity rule
 
-No behavior should be reimplemented specifically for MakeTrailer OS when the
+No behavior should be reimplemented specifically for local MakeTrailer when the
 production implementation can be made host-neutral. During the transition,
 the temporary local editor stays usable, but it is not the parity target.
-

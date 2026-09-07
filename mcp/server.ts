@@ -26,7 +26,7 @@ import { designElementSchema } from "../src/lib/schema";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local"), quiet: true });
 
-const server = new McpServer({ name: "maketrailer-os", version: "0.1.0" }, { capabilities: { tools: {}, prompts: {}, resources: {} } });
+const server = new McpServer({ name: "maketrailer", version: "0.1.0" }, { capabilities: { tools: {}, prompts: {}, resources: {} } });
 
 function result(value: unknown) {
   return { content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }], structuredContent: value as Record<string, unknown> };
@@ -50,7 +50,7 @@ server.registerTool("add_element", { title: "Add design element", description: "
 server.registerTool("update_element", { title: "Update design element", description: "Patch editable properties on one layer.", inputSchema: z.object({ designId: z.string(), elementId: z.string(), patch: z.record(z.string(), z.unknown()) }) }, async ({ designId, elementId, patch }) => result({ design: await updateElement(designId, elementId, patch) }));
 server.registerTool("delete_element", { title: "Delete design element", description: "Delete one layer from a local design.", inputSchema: z.object({ designId: z.string(), elementId: z.string() }), annotations: { destructiveHint: true } }, async ({ designId, elementId }) => result({ design: await deleteElement(designId, elementId) }));
 server.registerTool("generate_image", { title: "Generate image", description: "Generate an image with the user's server-side fal key, download it locally, and add it to the design.", inputSchema: z.object({ designId: z.string(), prompt: z.string().min(1) }) }, async ({ designId, prompt }) => result(await generateImage(designId, prompt)));
-server.registerTool("list_creative_skills", { title: "List creative skills", description: "List the portable prompt-writing and visual-composition skills bundled with MakeTrailer OS." }, async () => result({ skills: [{ name: "ad-image-prompt-writing", path: path.resolve("skills/ad-image-prompt-writing/SKILL.md") }, { name: "ad-visual-composition", path: path.resolve("skills/ad-visual-composition/SKILL.md") }] }));
+server.registerTool("list_creative_skills", { title: "List creative skills", description: "List the portable prompt-writing and visual-composition skills bundled with MakeTrailer." }, async () => result({ skills: [{ name: "ad-image-prompt-writing", path: path.resolve("skills/ad-image-prompt-writing/SKILL.md") }, { name: "ad-visual-composition", path: path.resolve("skills/ad-visual-composition/SKILL.md") }] }));
 
 for (const skill of ["ad-image-prompt-writing", "ad-visual-composition"]) {
   const uri = `maketrailer://skills/${skill}`;
@@ -61,4 +61,4 @@ server.registerPrompt("make_ad_design", { title: "Make an ad design", descriptio
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
-console.error(`MakeTrailer OS MCP is using ${process.env.MAKETRAILER_DATA_DIR || path.resolve(".maketrailer")}`);
+console.error(`MakeTrailer MCP is using ${process.env.MAKETRAILER_DATA_DIR || path.resolve(".maketrailer")}`);

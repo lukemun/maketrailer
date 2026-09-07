@@ -1,8 +1,8 @@
-# MakeTrailer OS
+# MakeTrailer
 
-An open, local ad canvas your AI agent can operate.
+An open-source, AI-native creative studio for ads, design, images, and video—built for people and agents.
 
-MakeTrailer OS saves projects, designs, and reusable assets on your computer, generates images with your own fal.ai key, exports full-resolution PNGs, and exposes the same workspace through a local MCP server. It has no account, Supabase, tracking, managed credit, or MakeTrailer cloud requirement.
+MakeTrailer saves projects, designs, and reusable assets on your computer, generates images with your own fal.ai key, exports full-resolution PNGs, and exposes the same workspace through a local MCP server. It has no account, Supabase, tracking, managed credit, or MakeTrailer Cloud requirement.
 
 > Status: early extraction. The local projects, assets, design, persistence, generation, export, and MCP foundations are implemented. The full production MakeTrailer canvas is now being moved here; the current editor is temporary and does not yet represent production parity. See [the roadmap](docs/roadmap.md).
 
@@ -29,8 +29,8 @@ MakeTrailer OS saves projects, designs, and reusable assets on your computer, ge
 ## Set up
 
 ```bash
-git clone https://github.com/lukemun/maketrailer-os.git
-cd maketrailer-os
+git clone https://github.com/lukemun/maketrailer.git
+cd maketrailer
 pnpm install
 cp .env.example .env.local
 pnpm dev
@@ -64,7 +64,7 @@ By default, data lives in:
 └── media/     # uploads and downloaded generations
 ```
 
-Set `MAKETRAILER_DATA_DIR` to an absolute path to store it elsewhere. Back up that directory to back up all MakeTrailer OS work.
+Set `MAKETRAILER_DATA_DIR` to an absolute path to store it elsewhere. Back up that directory to back up all MakeTrailer work.
 
 ## Connect MCP locally
 
@@ -73,11 +73,11 @@ First install dependencies. Then add this stdio server to your MCP client, repla
 ```json
 {
   "mcpServers": {
-    "maketrailer-os": {
+    "maketrailer": {
       "command": "pnpm",
-      "args": ["--dir", "/absolute/path/to/maketrailer-os", "--silent", "mcp"],
+      "args": ["--dir", "/absolute/path/to/maketrailer", "--silent", "mcp"],
       "env": {
-        "MAKETRAILER_DATA_DIR": "/absolute/path/to/maketrailer-os/.maketrailer"
+        "MAKETRAILER_DATA_DIR": "/absolute/path/to/maketrailer/.maketrailer"
       }
     }
   }
@@ -139,9 +139,9 @@ The smoke check uses a temporary data directory and proves create → save → r
 
 This is local software, not a security boundary against other processes with access to your user account. See [SECURITY.md](SECURITY.md) for reporting.
 
-## Open source versus hosted MakeTrailer
+## Open source versus MakeTrailer Cloud
 
-MakeTrailer OS will contain the complete production canvas, local projects and assets, BYO generation, export, and MCP control. Hosted MakeTrailer may provide accounts, collaboration, managed generation and credits, hosted media, publishing, campaign and book workflows, organization controls, and support. MakeTrailer OS must not phone home or silently require those services.
+This repository will contain the complete production canvas, local projects and assets, BYO generation, export, and MCP control. MakeTrailer Cloud may provide accounts, collaboration, managed generation and credits, hosted media, publishing, campaign and book workflows, organization controls, and support. Local MakeTrailer must not phone home or silently require those services.
 
 ## Contributing
 
@@ -149,4 +149,4 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT
 
 ## License
 
-MakeTrailer OS is licensed under AGPL-3.0-or-later. See [LICENSE](LICENSE). The MakeTrailer name and logos are not granted under that software license.
+MakeTrailer is licensed under AGPL-3.0-or-later. See [LICENSE](LICENSE). The MakeTrailer name and logos are not granted under that software license.
